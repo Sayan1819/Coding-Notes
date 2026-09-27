@@ -381,7 +381,7 @@
   .code-block-head {
     background: #262a32; color: #9aa2ad; font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem; padding: 7px 14px; letter-spacing: 0.04em; text-transform: uppercase;
-    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    display: flex; justify-space-between; align-items: center; gap: 8px;
     user-select: none; position: relative; z-index: 5;
   }
   .code-block-head .head-left {
@@ -468,9 +468,9 @@
     display: flex;
     align-items: flex-start;
     width: 100%;
-    line-height: 1.6;
+    line-height: 22px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
+    font-size: 14px;
   }
 
   .code-block .line-num {
@@ -484,6 +484,8 @@
     -webkit-user-select: none;
     border-right: 1px solid var(--code-border);
     box-sizing: border-box;
+    font-size: 14px;
+    line-height: 22px;
   }
 
   .code-block .line-code {
@@ -493,36 +495,43 @@
     white-space: pre-wrap;
     word-break: break-word;
     color: var(--code-text);
+    font-size: 14px;
+    line-height: 22px;
   }
 
+  /* Fixed 1:1 Pixel Alignment in Edit Mode */
   .code-edit-wrapper {
     display: flex;
     align-items: stretch;
     width: 100%;
     background: var(--code-bg);
+    padding: 10px 0;
   }
   .code-edit-wrapper .line-numbers {
     flex: 0 0 50px;
     width: 50px;
     text-align: right;
-    padding: 12px 12px 12px 0;
+    padding: 0 12px 0 0;
+    margin: 0;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    line-height: 1.6;
+    font-size: 14px;
+    line-height: 22px;
     color: var(--tok-preproc);
     opacity: 0.55;
     user-select: none;
     border-right: 1px solid var(--code-border);
     box-sizing: border-box;
     white-space: pre;
+    overflow: hidden;
   }
   .code-edit-wrapper textarea.cpp-code {
     flex: 1 1 auto;
     min-width: 0;
-    padding: 12px 14px;
+    padding: 0 14px;
+    margin: 0;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    line-height: 1.6;
+    font-size: 14px;
+    line-height: 22px;
     color: var(--code-text);
     background: transparent;
     border: none;
@@ -535,6 +544,10 @@
     caret-color: var(--accent-blue);
     tab-size: 4; -moz-tab-size: 4;
     box-sizing: border-box;
+    letter-spacing: normal;
+    word-spacing: normal;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .tok-keyword { color: var(--tok-keyword); }
@@ -726,8 +739,8 @@
       display: flex !important;
       align-items: flex-start !important;
       width: 100% !important;
-      line-height: 1.6 !important;
-      font-size: 0.82rem !important;
+      line-height: 22px !important;
+      font-size: 14px !important;
       font-family: 'JetBrains Mono', monospace !important;
       page-break-inside: avoid !important;
       break-inside: avoid !important;
@@ -737,8 +750,8 @@
       width: 45px !important;
       text-align: right !important;
       padding-right: 10px !important;
-      font-size: 0.82rem !important;
-      line-height: 1.6 !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
       color: var(--tok-preproc) !important;
       border-right: 1px solid var(--code-border) !important;
       box-sizing: border-box !important;
@@ -751,8 +764,8 @@
       padding-left: 10px !important;
       white-space: pre-wrap !important;
       word-break: break-word !important;
-      font-size: 0.82rem !important;
-      line-height: 1.6 !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
       box-sizing: border-box !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
