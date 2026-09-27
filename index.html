@@ -1093,8 +1093,13 @@
     if (lineCodes && lineCodes.length > 0) {
       var linesArr = [];
       lineCodes.forEach(function(lc) {
-        var text = lc.innerText.replace(/\u00a0/g, ' ');
-        linesArr.push(text);
+        // Fix: Do not convert placeholder non-breaking space (&nbsp;) into a literal space character
+        if (lc.innerHTML === '&nbsp;' || lc.innerText === '\u00a0' || lc.textContent === '\u00a0') {
+          linesArr.push('');
+        } else {
+          var text = lc.innerText.replace(/\u00a0/g, ' ');
+          linesArr.push(text);
+        }
       });
       return linesArr.join('\n');
     }
