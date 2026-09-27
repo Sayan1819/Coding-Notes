@@ -376,6 +376,7 @@
     margin: 1.4em 0; border-radius: 7px; overflow: hidden; border: 1px solid var(--code-border);
     background: var(--code-bg);
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    cursor: pointer;
   }
   .code-block-head {
     background: #262a32; color: #9aa2ad; font-family: 'JetBrains Mono', monospace;
@@ -614,13 +615,6 @@
       -webkit-print-color-adjust: exact !important; 
       print-color-adjust: exact !important; 
       color-adjust: exact !important; 
-      caret-color: transparent !important;
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    [contenteditable], [contenteditable]:focus {
-      outline: none !important;
       caret-color: transparent !important;
     }
 
@@ -1214,7 +1208,10 @@
     block.replaceChild(wrapper, container);
     autoGrowTextarea(ta);
     updateEditLineNumbers(ta);
-    ta.focus();
+
+    setTimeout(function(){
+      ta.focus();
+    }, 10);
   }
 
   function exitCodeEditMode(ta) {
@@ -2031,6 +2028,15 @@
       '</div><p><br></p>';
     document.execCommand('insertHTML', false, html);
     ensureCopyButtons();
+    
+    var activeSheet = document.querySelector('.page-sheet.active');
+    if (activeSheet) {
+      var blocks = activeSheet.querySelectorAll('.code-block');
+      if (blocks.length > 0) {
+        var lastBlock = blocks[blocks.length - 1];
+        enterCodeEditMode(lastBlock);
+      }
+    }
     syncActivePage();
   });
 
@@ -2172,44 +2178,42 @@
     }
   });
 
-  document.addEventListener('mousedown', function(e){
-    var btn = e.target.closest && e.target.closest('.copy-code-btn');
-    if (btn) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }, true);
+  pagesContainerEl.addEventListener('click', function(e){
+    if (isViewMode) return;
 
-  document.addEventListener('click', function(e){
-    var btn = e.target.closest && e.target.closest('.copy-code-btn');
-    if (btn) {
+    var copyBtn = e.target.closest && e.target.closest('.copy-code-btn');
+    if (copyBtn) {
       e.preventDefault();
       e.stopPropagation();
-      var block = btn.closest('.code-block');
-      if (block) copyCodeFromBlock(block, btn);
+      var block = copyBtn.closest('.code-block');
+      if (block) copyCodeFromBlock(block, copyBtn);
       return;
     }
 
     var tocItem = e.target.closest && e.target.closest('.toc-item');
-    if (tocItem) setActive(tocItem.dataset.goto);
-  }, true);
+    if (tocItem) {
+      setActive(tocItem.dataset.goto);
+      return;
+    }
 
-  pagesContainerEl.addEventListener('mousedown', function(e){
-    if (isViewMode) return;
-    if (e.target.closest && e.target.closest('.copy-code-btn')) return;
-    if (e.target.closest && e.target.closest('.code-filename')) return;
+    if (e.target.closest && (e.target.closest('.code-filename') || e.target.closest('textarea.cpp-code'))) {
+      return;
+    }
 
     var codeBlock = e.target.closest && e.target.closest('.code-block');
     if (codeBlock) {
       if (!codeBlock.querySelector('textarea.cpp-code')) {
         enterCodeEditMode(codeBlock);
       }
-      return;
     }
   });
 
   pagesContainerEl.addEventListener('focusout', function(e){
-    if (e.target.classList && e.target.classList.contains('cpp-code') && e.target.tagName === 'TEXTAREA') {
+    if (e.target && e.target.classList && e.target.classList.contains('cpp-code') && e.target.tagName === 'TEXTAREA') {
+      var currentBlock = e.target.closest('.code-block');
+      if (e.relatedTarget && currentBlock && currentBlock.contains(e.relatedTarget)) {
+        return;
+      }
       exitCodeEditMode(e.target);
     }
   });
@@ -2266,32 +2270,16 @@
     document.querySelectorAll('textarea.cpp-code').forEach(function(ta){
       exitCodeEditMode(ta);
     });
-    document.querySelectorAll('.page-body').forEach(function(el){
-      el.setAttribute('contenteditable', 'false');
-    });
     syncActivePage();
   }
 
-  function restoreAfterPrint() {
-    if (!isViewMode) {
-      document.querySelectorAll('.page-body').forEach(function(el){
-        el.setAttribute('contenteditable', 'true');
-      });
-    }
-  }
-
   window.addEventListener('beforeprint', prepareForPrint);
-  window.addEventListener('afterprint', restoreAfterPrint);
 
   document.getElementById('exportBtn').addEventListener('click', function(){
     prepareForPrint();
     var all = document.getElementById('exportAllChk').checked;
     document.body.classList.toggle('print-all', all);
-
-    setTimeout(function(){
-      window.print();
-      setTimeout(restoreAfterPrint, 500);
-    }, 50);
+    window.print();
   });
 
   document.getElementById('addChapterBtn').addEventListener('click', addChapter);
