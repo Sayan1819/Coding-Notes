@@ -335,7 +335,7 @@
   }
   .page-title:empty:before, .page-kicker:empty:before, .page-body:empty:before {
     content: attr(data-placeholder);
-    color: var(--ink-dim); opacity: 0.55; pointer-events: none;
+    color: var(--ink-dim); opacity: 0.35; pointer-events: none;
   }
   .page-body:empty:before { font-family: 'Source Serif 4', serif; font-style: italic; }
 
@@ -350,7 +350,6 @@
     caret-color: var(--accent-blue);
     padding-bottom: 30px;
   }
-  /* Tightened Heading & Text Margins */
   .page-body h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.65rem; margin: 1.1em 0 0.4em; }
   .page-body h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; margin: 1em 0 0.3em; color: #7ec8ff; }
   .page-body h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; margin: 0.9em 0 0.3em; color: var(--accent-blue); }
@@ -369,7 +368,6 @@
   .page-body font[size="5"] { font-size: 1.35rem; }
   .page-body font[size="7"] { font-size: 1.7rem; }
 
-  /* Little Notes (Address Tag) Styling - Default 11px */
   .page-body address {
     display: block; font-style: normal; font-family: 'Space Grotesk', sans-serif;
     font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em;
@@ -476,7 +474,6 @@
     box-shadow: 0 0 8px rgba(76, 194, 255, 0.4);
   }
 
-  /* Per-line flex container */
   .code-block .code-container {
     display: flex;
     flex-direction: column;
@@ -516,7 +513,6 @@
     color: var(--code-text);
   }
 
-  /* Edit Mode Wrapper */
   .code-edit-wrapper {
     display: flex;
     align-items: stretch;
@@ -567,7 +563,6 @@
   .tok-preproc { color: var(--tok-preproc); }
   .tok-macro { color: var(--tok-macro); }
 
-  /* ---------- Mobile ---------- */
   @media (max-width: 860px) {
     .sidebar { position: fixed; top: 0; bottom: 0; left: 0; transform: translateX(-100%); width: 250px; }
     .sidebar.open { transform: translateX(0); box-shadow: 8px 0 24px rgba(0,0,0,0.4); }
@@ -581,12 +576,10 @@
     }
   }
 
-  /* ---------- View Mode Rules ---------- */
   body.view-mode .toolbar .tgroup { display: none; }
   body.view-mode .page-title, body.view-mode .page-kicker, body.view-mode .page-body { cursor: default; }
   body.view-mode input.code-filename { pointer-events: none; cursor: default; opacity: 0.85; }
 
-  /* ---------- Mode Switcher ---------- */
   .mode-switch-container {
     position: fixed;
     top: calc(10px + env(safe-area-inset-top, 0px));
@@ -630,7 +623,6 @@
   ::-webkit-scrollbar-thumb { background: #333944; border-radius: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
 
-  /* ---------- FULL BLEED TRUE-SCALE PDF PRINT CSS ---------- */
   @media print {
     @page {
       size: letter portrait;
@@ -974,9 +966,9 @@
 
 <script>
 (function(){
-  var STORAGE_KEY = 'ue5-cpp-notebook-v2';
-  var SOLIDS_KEY = 'ue5-cpp-notebook-v2-saved-solids';
-  var GRADS_KEY = 'ue5-cpp-notebook-v2-saved-grads';
+  var STORAGE_KEY = 'ue5-cpp-notebook-v3';
+  var SOLIDS_KEY = 'ue5-cpp-notebook-v3-saved-solids';
+  var GRADS_KEY = 'ue5-cpp-notebook-v3-saved-grads';
 
   var pages = [];
   var activeId = null;
@@ -1004,49 +996,18 @@
 
   function defaultIndexData(){
     return {
-      title: 'Index',
-      kicker: 'Unreal Engine 5 C++ Knowledge Base',
-      html: '<p>Every C++ chapter you add appears here automatically — click to jump directly to it.</p>'
+      title: '',
+      kicker: '',
+      html: '<p><br></p>'
     };
   }
 
   function defaultData(){
-    var initCode = 
-'#pragma once\n\n' +
-'#include "CoreMinimal.h"\n' +
-'#include "GameFramework/Actor.h"\n' +
-'#include "MyActor.generated.h"\n\n' +
-'UCLASS()\n' +
-'class MYGAME_API AMyActor : public AActor\n' +
-'{\n' +
-'    GENERATED_BODY()\n\n' +
-'public:\t\n' +
-'    AMyActor();\n\n' +
-'protected:\n' +
-'    virtual void BeginPlay() override;\n\n' +
-'public:\t\n' +
-'    virtual void Tick(float DeltaTime) override;\n\n' +
-'    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")\n' +
-'    UStaticMeshComponent* MeshComponent;\n\n' +
-'    UFUNCTION(BlueprintCallable, Category = "Combat")\n' +
-'    void TakeCustomDamage(float Amount);\n' +
-'};';
-
     return [{
       id: uid(),
-      title: 'UE5 C++ Basics',
-      kicker: 'Unreal Engine 5 · Actor Architecture',
-      html:
-        '<h2>UE5 C++ Custom Actor</h2>' +
-        '<p>Below is a clean C++ starter template including Unreal reflection macros (<code>UCLASS</code>, <code>UPROPERTY</code>, <code>UFUNCTION</code>):</p>' +
-        '<div class="code-block" contenteditable="false">' +
-          '<div class="code-block-head"><div class="head-left"><span class="code-lang-label">C++</span> <span class="code-sep">·</span> <input class="code-filename" type="text" value="MYACTOR.H" placeholder="MyActor.h" spellcheck="false"></div><button class="copy-code-btn" type="button" title="Copy code to clipboard">📋 Copy</button></div>' +
-          '<div class="code-container">' + buildCodeLinesHTML(initCode) + '</div>' +
-        '</div>' +
-        '<p>Click directly inside the C++ box to start editing code with live flex-aligned line numbering!</p>' +
-        '<hr>' +
-        '<h3>Next Steps</h3>' +
-        '<p>Create additional chapters from the sidebar for specific Unreal subsystems, algorithms, or math notes.</p>'
+      title: '',
+      kicker: '',
+      html: '<p><br></p>'
     }];
   }
 
@@ -1054,7 +1015,6 @@
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  /* Optimized C++ & Unreal Engine 5 Tokenizer */
   function getCppRegex() {
     var comments = '(//.*|/\\*[\\s\\S]*?\\*/)';
     var strings = '("(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|<[a-zA-Z0-9_\\/\\.-]+>)';
@@ -1093,7 +1053,6 @@
     return out;
   }
 
-  /* Converts raw C++ into line-by-line flex rows that handle soft wrapping */
   function buildCodeLinesHTML(rawCode) {
     if (!rawCode) rawCode = '';
     var highlighted = highlightCode(rawCode);
@@ -1327,7 +1286,6 @@
     });
   });
 
-  /* Gradient Stripper Function */
   function removeGradientFromSelection() {
     restoreSelection();
     var sel = window.getSelection();
@@ -1405,7 +1363,7 @@
     } catch(e) { console.warn('load failed', e); }
     pages = defaultData();
     indexData = defaultIndexData();
-    activeId = 'INDEX';
+    activeId = pages[0].id;
   }
 
   function saveNow(){
@@ -1762,14 +1720,14 @@
     var title = document.createElement('div');
     title.className = 'page-title';
     title.contentEditable = isViewMode ? 'false' : 'true';
-    title.textContent = indexData.title || 'Index';
-    title.setAttribute('data-placeholder', 'Notebook Index...');
+    title.textContent = indexData.title || '';
+    title.setAttribute('data-placeholder', 'Notebook Title...');
 
     var kicker = document.createElement('div');
     kicker.className = 'page-kicker';
     kicker.contentEditable = isViewMode ? 'false' : 'true';
-    kicker.textContent = indexData.kicker || 'Unreal Engine 5 C++ Knowledge Base';
-    kicker.setAttribute('data-placeholder', 'SUBTITLE / KICKER...');
+    kicker.textContent = indexData.kicker || '';
+    kicker.setAttribute('data-placeholder', 'SUBTITLE...');
 
     var toc = document.createElement('div');
     toc.className = 'toc-list';
@@ -1779,7 +1737,7 @@
     var body = document.createElement('div');
     body.className = 'page-body';
     body.contentEditable = isViewMode ? 'false' : 'true';
-    body.innerHTML = indexData.html || '<p>Start writing…</p>';
+    body.innerHTML = indexData.html || '<p><br></p>';
 
     sheet.appendChild(title);
     sheet.appendChild(kicker);
@@ -1823,12 +1781,12 @@
       kicker.className = 'page-kicker';
       kicker.contentEditable = isViewMode ? 'false' : 'true';
       kicker.textContent = p.kicker || '';
-      kicker.setAttribute('data-placeholder', 'SUBTITLE / KICKER...');
+      kicker.setAttribute('data-placeholder', 'SUBTITLE...');
 
       var body = document.createElement('div');
       body.className = 'page-body';
       body.contentEditable = isViewMode ? 'false' : 'true';
-      body.innerHTML = p.html || '';
+      body.innerHTML = p.html || '<p><br></p>';
 
       sheet.appendChild(title);
       sheet.appendChild(kicker);
@@ -1857,7 +1815,7 @@
   }
 
   function addChapter(){
-    var p = { id: uid(), title: '', kicker: '', html: '' };
+    var p = { id: uid(), title: '', kicker: '', html: '<p><br></p>' };
     pages.push(p);
     renderAll();
     setActive(p.id);
@@ -1926,7 +1884,6 @@
     restoreSelection();
     document.execCommand('formatBlock', false, this.value);
     
-    /* Default font size for Little Note (ADDRESS) is 11px */
     if (this.value === 'ADDRESS') {
       sizeInputEl.value = 11;
       applyCustomFontSize(11);
@@ -2106,13 +2063,12 @@
     syncActivePage();
   });
 
-  /* Insertion of Dedicated C++ Code Block */
   document.getElementById('insertCodeBtn').addEventListener('click', function(){
     restoreSelection();
-    var defaultText = '// write your C++ code here';
+    var defaultText = '';
     var html =
       '<div class="code-block" contenteditable="false">' +
-        '<div class="code-block-head"><div class="head-left"><span class="code-lang-label">C++</span> <span class="code-sep">·</span> <input class="code-filename" type="text" value="" placeholder="MyActor.h" spellcheck="false"></div><button class="copy-code-btn" type="button" title="Copy code to clipboard">📋 Copy</button></div>' +
+        '<div class="code-block-head"><div class="head-left"><span class="code-lang-label">C++</span> <span class="code-sep">·</span> <input class="code-filename" type="text" value="" placeholder="filename.h" spellcheck="false"></div><button class="copy-code-btn" type="button" title="Copy code to clipboard">📋 Copy</button></div>' +
         '<div class="code-container">' + buildCodeLinesHTML(defaultText) + '</div>' +
       '</div><p><br></p>';
     document.execCommand('insertHTML', false, html);
@@ -2182,12 +2138,10 @@
   pagesContainerEl.addEventListener('keyup', updateToolbarState);
   pagesContainerEl.addEventListener('mouseup', updateToolbarState);
 
-  /* ---------- TAB KEY INTERCEPTOR FOR 4 SPACES ---------- */
   pagesContainerEl.addEventListener('keydown', function(e) {
     if (e.key === 'Tab') {
       var target = e.target;
       
-      // 1. In C++ Code Block Textarea
       if (target.tagName === 'TEXTAREA' && target.classList.contains('cpp-code')) {
         e.preventDefault();
         var start = target.selectionStart;
@@ -2203,7 +2157,6 @@
         return;
       }
 
-      // 2. In Contenteditable Text Areas
       var editable = target.closest && target.closest('[contenteditable="true"]');
       if (editable) {
         e.preventDefault();
@@ -2335,7 +2288,7 @@
       var idxTitleEl = sheet.querySelector('.page-title');
       var idxKickerEl = sheet.querySelector('.page-kicker');
       var idxBodyEl = sheet.querySelector('.page-body');
-      if (idxTitleEl) indexData.title = idxTitleEl.textContent.trim() || 'Index';
+      if (idxTitleEl) indexData.title = idxTitleEl.textContent.trim();
       if (idxKickerEl) indexData.kicker = idxKickerEl.textContent.trim();
       if (idxBodyEl) indexData.html = idxBodyEl.innerHTML;
       saveDebounced();
@@ -2359,7 +2312,6 @@
     saveDebounced();
   }
 
-  /* Pre-Print Cleanup Event Hook */
   window.addEventListener('beforeprint', function() {
     document.querySelectorAll('textarea.cpp-code').forEach(function(ta){
       exitCodeEditMode(ta);
