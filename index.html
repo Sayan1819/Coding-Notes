@@ -355,7 +355,7 @@
     margin: 0.6em 0;
   }
 
-  .toc-list { margin: 4px 0 1.5em; }
+  .toc-list { margin: 1em 0 1.5em; display: block; }
   .toc-item {
     display: flex; align-items: baseline; gap: 10px;
     padding: 8px 2px; cursor: pointer;
@@ -365,11 +365,7 @@
   .toc-item:hover { color: var(--accent-blue); }
   .toc-item .toc-num { color: var(--ink-dim); width: 1.8em; flex-shrink: 0; font-variant-numeric: tabular-nums; }
   .toc-item .toc-title { flex: 1; }
-  .toc-item .toc-page {
-    margin-left: auto; flex-shrink: 0; color: var(--ink-dim);
-    font-size: 0.82rem; font-variant-numeric: tabular-nums;
-  }
-  .toc-empty { color: var(--ink-dim); font-family: 'Source Serif 4', serif; font-style: italic; }
+  .toc-empty { color: var(--ink-dim); font-family: 'Source Serif 4', serif; font-style: italic; padding: 8px 0; }
 
   /* ---------- C++ Code Block Flex Line Alignment ---------- */
   .code-block {
@@ -991,7 +987,7 @@
   function defaultIndexData(){
     return {
       title: 'Index',
-      html: '<h1>Index</h1><p class="toc-empty">Table of Contents will list all chapters automatically.</p><div class="toc-list" id="tocList"></div><p><br></p>'
+      html: '<h1>Index</h1><div class="toc-list" id="tocList"></div><p><br></p>'
     };
   }
 
@@ -1651,6 +1647,7 @@
       draggingId = null;
       currentOrder = null;
       renderSidebar();
+      updateToc();
       saveNow();
     }
     document.addEventListener('pointermove', onMove);
@@ -1715,7 +1712,7 @@
     var body = document.createElement('div');
     body.className = 'page-body';
     body.contentEditable = isViewMode ? 'false' : 'true';
-    body.innerHTML = indexData.html || '<h1>Index</h1><p class="toc-empty">Table of Contents will list all chapters automatically.</p><div class="toc-list" id="tocList"></div><p><br></p>';
+    body.innerHTML = indexData.html || '<h1>Index</h1><div class="toc-list" id="tocList"></div><p><br></p>';
 
     sheet.appendChild(body);
     ensureCopyButtons(sheet);
@@ -1724,12 +1721,23 @@
   }
 
   function updateToc(){
-    var toc = document.getElementById('tocList');
-    if (!toc) return;
-    if (!pages.length) {
+    var indexSheet = document.querySelector('.page-sheet[data-id="INDEX"] .page-body');
+    if (!indexSheet) return;
+
+    var toc = indexSheet.querySelector('#tocList');
+    if (!toc) {
+      toc = document.createElement('div');
+      toc.className = 'toc-list';
+      toc.id = 'tocList';
+      toc.contentEditable = 'false';
+      indexSheet.appendChild(toc);
+    }
+
+    if (!pages || !pages.length) {
       toc.innerHTML = '<div class="toc-empty">No chapters yet — add one from the sidebar.</div>';
       return;
     }
+
     toc.innerHTML = pages.map(function(p, i){
       return '<div class="toc-item" data-goto="' + p.id + '">' +
         '<span class="toc-num">' + (i+1) + '</span>' +
@@ -2255,7 +2263,12 @@
     if (!sheet) return;
     if (activeId === 'INDEX') {
       var idxBodyEl = sheet.querySelector('.page-body');
-      if (idxBodyEl) indexData.html = idxBodyEl.innerHTML;
+      if (idxBodyEl) {
+        var clone = idxBodyEl.cloneNode(true);
+        var cloneToc = clone.querySelector('#tocList');
+        if (cloneToc) cloneToc.innerHTML = '';
+        indexData.html = clone.innerHTML;
+      }
       saveDebounced();
       return;
     }
