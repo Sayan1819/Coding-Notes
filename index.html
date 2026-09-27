@@ -615,6 +615,13 @@
       print-color-adjust: exact !important; 
       color-adjust: exact !important; 
       caret-color: transparent !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    [contenteditable], [contenteditable]:focus {
+      outline: none !important;
+      caret-color: transparent !important;
     }
 
     html, body { 
@@ -2248,34 +2255,43 @@
     saveDebounced();
   }
 
-  window.addEventListener('beforeprint', function() {
-    if (document.activeElement) {
+  function prepareForPrint() {
+    if (document.activeElement && document.activeElement.blur) {
       document.activeElement.blur();
     }
     if (window.getSelection) {
-      window.getSelection().removeAllRanges();
+      var sel = window.getSelection();
+      if (sel.removeAllRanges) sel.removeAllRanges();
     }
     document.querySelectorAll('textarea.cpp-code').forEach(function(ta){
       exitCodeEditMode(ta);
     });
+    document.querySelectorAll('.page-body').forEach(function(el){
+      el.setAttribute('contenteditable', 'false');
+    });
     syncActivePage();
-  });
+  }
+
+  function restoreAfterPrint() {
+    if (!isViewMode) {
+      document.querySelectorAll('.page-body').forEach(function(el){
+        el.setAttribute('contenteditable', 'true');
+      });
+    }
+  }
+
+  window.addEventListener('beforeprint', prepareForPrint);
+  window.addEventListener('afterprint', restoreAfterPrint);
 
   document.getElementById('exportBtn').addEventListener('click', function(){
-    if (document.activeElement) {
-      document.activeElement.blur();
-    }
-    if (window.getSelection) {
-      window.getSelection().removeAllRanges();
-    }
-
-    document.querySelectorAll('textarea.cpp-code').forEach(function(ta){
-      exitCodeEditMode(ta);
-    });
-    syncActivePage();
+    prepareForPrint();
     var all = document.getElementById('exportAllChk').checked;
     document.body.classList.toggle('print-all', all);
-    window.print();
+
+    setTimeout(function(){
+      window.print();
+      setTimeout(restoreAfterPrint, 500);
+    }, 50);
   });
 
   document.getElementById('addChapterBtn').addEventListener('click', addChapter);
