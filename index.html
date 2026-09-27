@@ -614,6 +614,7 @@
       -webkit-print-color-adjust: exact !important; 
       print-color-adjust: exact !important; 
       color-adjust: exact !important; 
+      caret-color: transparent !important;
     }
 
     html, body { 
@@ -2248,6 +2249,12 @@
   }
 
   window.addEventListener('beforeprint', function() {
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
     document.querySelectorAll('textarea.cpp-code').forEach(function(ta){
       exitCodeEditMode(ta);
     });
@@ -2255,6 +2262,13 @@
   });
 
   document.getElementById('exportBtn').addEventListener('click', function(){
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
+
     document.querySelectorAll('textarea.cpp-code').forEach(function(ta){
       exitCodeEditMode(ta);
     });
