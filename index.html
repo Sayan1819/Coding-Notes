@@ -1763,11 +1763,13 @@
     title.className = 'page-title';
     title.contentEditable = isViewMode ? 'false' : 'true';
     title.textContent = indexData.title || 'Index';
+    title.setAttribute('data-placeholder', 'Notebook Index...');
 
     var kicker = document.createElement('div');
     kicker.className = 'page-kicker';
     kicker.contentEditable = isViewMode ? 'false' : 'true';
     kicker.textContent = indexData.kicker || 'Unreal Engine 5 C++ Knowledge Base';
+    kicker.setAttribute('data-placeholder', 'SUBTITLE / KICKER...');
 
     var toc = document.createElement('div');
     toc.className = 'toc-list';
@@ -1811,11 +1813,25 @@
       sheet.className = 'page-sheet' + (p.id === activeId ? ' active' : '');
       sheet.dataset.id = p.id;
 
+      var title = document.createElement('div');
+      title.className = 'page-title';
+      title.contentEditable = isViewMode ? 'false' : 'true';
+      title.textContent = p.title || '';
+      title.setAttribute('data-placeholder', 'Chapter Title...');
+
+      var kicker = document.createElement('div');
+      kicker.className = 'page-kicker';
+      kicker.contentEditable = isViewMode ? 'false' : 'true';
+      kicker.textContent = p.kicker || '';
+      kicker.setAttribute('data-placeholder', 'SUBTITLE / KICKER...');
+
       var body = document.createElement('div');
       body.className = 'page-body';
       body.contentEditable = isViewMode ? 'false' : 'true';
       body.innerHTML = p.html || '';
 
+      sheet.appendChild(title);
+      sheet.appendChild(kicker);
       sheet.appendChild(body);
       ensureCopyButtons(sheet);
       upgradeLegacyCodeBlocks(sheet);
@@ -2279,22 +2295,7 @@
       }
       return;
     }
-
-    if (e.target.classList && e.target.classList.contains('page-body')) {
-      e.preventDefault();
-      placeCaretAtEnd(e.target);
-    }
   });
-
-  function placeCaretAtEnd(el){
-    el.focus();
-    var range = document.createRange();
-    range.selectNodeContents(el);
-    range.collapse(false);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-  }
 
   pagesContainerEl.addEventListener('focusout', function(e){
     if (e.target.classList && e.target.classList.contains('cpp-code') && e.target.tagName === 'TEXTAREA') {
@@ -2334,16 +2335,27 @@
       var idxTitleEl = sheet.querySelector('.page-title');
       var idxKickerEl = sheet.querySelector('.page-kicker');
       var idxBodyEl = sheet.querySelector('.page-body');
-      indexData.title = idxTitleEl.textContent.trim() || 'Index';
-      indexData.kicker = idxKickerEl.textContent.trim() || 'Unreal Engine 5 C++ Knowledge Base';
-      indexData.html = idxBodyEl.innerHTML;
+      if (idxTitleEl) indexData.title = idxTitleEl.textContent.trim() || 'Index';
+      if (idxKickerEl) indexData.kicker = idxKickerEl.textContent.trim();
+      if (idxBodyEl) indexData.html = idxBodyEl.innerHTML;
       saveDebounced();
       return;
     }
     var p = currentPage();
     if (!p) return;
+    var titleEl = sheet.querySelector('.page-title');
+    var kickerEl = sheet.querySelector('.page-kicker');
     var bodyEl = sheet.querySelector('.page-body');
-    p.html = bodyEl.innerHTML;
+    if (titleEl) {
+      var newTitle = titleEl.textContent.trim();
+      if (newTitle !== p.title) {
+        p.title = newTitle;
+        renderSidebar();
+        updateToc();
+      }
+    }
+    if (kickerEl) p.kicker = kickerEl.textContent.trim();
+    if (bodyEl) p.html = bodyEl.innerHTML;
     saveDebounced();
   }
 
