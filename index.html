@@ -302,7 +302,7 @@
   }
   .apply-gradient-btn:hover { background: #6ccfff; }
 
-  /* ---------- Page canvas & Extra Wide Editing Canvas ---------- */
+  /* ---------- Page canvas & Compact Spacing ---------- */
   .canvas { flex: 1; overflow-y: auto; padding: 30px 24px 80px; }
   
   .pages-container { width: 100%; max-width: 1200px; margin: 0 auto; }
@@ -313,7 +313,7 @@
     border: 1px solid var(--paper-edge);
     box-shadow: 0 6px 36px rgba(0,0,0,0.5);
     border-radius: 6px;
-    padding: 52px 48px 100px;
+    padding: 48px 48px 80px;
     color: var(--ink);
     position: relative;
     min-height: 980px;
@@ -323,13 +323,13 @@
   .page-title {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 2rem; font-weight: 700;
-    outline: none; margin-bottom: 8px; color: var(--ink);
+    outline: none; margin-bottom: 4px; color: var(--ink);
     caret-color: var(--accent-blue);
   }
   .page-kicker {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 0.78rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em;
-    margin: 0 0 24px;
+    margin: 0 0 16px;
     outline: none; cursor: text; min-height: 1em;
     caret-color: var(--accent-blue);
   }
@@ -342,41 +342,44 @@
   .page-body {
     font-family: 'Source Serif 4', serif;
     font-size: 1.08rem;
-    line-height: 1.8;
+    line-height: 1.6;
     outline: none;
     width: 100%;
     max-width: 100%;
     min-height: 400px;
     caret-color: var(--accent-blue);
-    padding-bottom: 40px;
+    padding-bottom: 30px;
   }
-  .page-body h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.65rem; margin: 2.2em 0 0.8em; }
-  .page-body h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; margin: 2.2em 0 0.8em; color: #7ec8ff; }
-  .page-body h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; margin: 2.4em 0 0.8em; color: var(--accent-blue); }
-  .page-body p { margin: 1em 0; }
+  /* Tightened Heading & Text Margins */
+  .page-body h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.65rem; margin: 1.1em 0 0.4em; }
+  .page-body h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; margin: 1em 0 0.3em; color: #7ec8ff; }
+  .page-body h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; margin: 0.9em 0 0.3em; color: var(--accent-blue); }
+  .page-body p { margin: 0.5em 0; }
   .page-body blockquote {
-    margin: 1.8em 0; padding: 14px 20px; background: #14120a;
+    margin: 1.2em 0; padding: 10px 16px; background: #14120a;
     border-left: 3px solid var(--accent-amber); font-style: italic; color: #e3c98d;
     border-radius: 0 4px 4px 0;
   }
-  .page-body hr { border: none; border-top: 1px solid var(--rule); margin: 2.8em 0; }
+  .page-body hr { border: none; border-top: 1px solid var(--rule); margin: 1.6em 0; }
   .page-body hr.dotted { border-top: 2px dotted var(--rule); }
-  .page-body ul, .page-body ol { margin: 1em 0; padding-left: 1.5em; }
-  .page-body li { margin: 0.45em 0; }
+  .page-body ul, .page-body ol { margin: 0.6em 0; padding-left: 1.5em; }
+  .page-body li { margin: 0.3em 0; }
   .page-body font[size="1"] { font-size: 0.78rem; }
   .page-body font[size="3"] { font-size: 1.05rem; }
   .page-body font[size="5"] { font-size: 1.35rem; }
   .page-body font[size="7"] { font-size: 1.7rem; }
+
+  /* Little Notes (Address Tag) Styling - Default 11px */
   .page-body address {
     display: block; font-style: normal; font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.72rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em;
-    margin: 1.2em 0;
+    font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0.6em 0;
   }
 
-  .toc-list { margin: 4px 0 2em; }
+  .toc-list { margin: 4px 0 1.5em; }
   .toc-item {
     display: flex; align-items: baseline; gap: 10px;
-    padding: 9px 2px; cursor: pointer;
+    padding: 8px 2px; cursor: pointer;
     border-bottom: 1px dotted var(--rule);
     font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; color: var(--ink);
   }
@@ -391,7 +394,7 @@
 
   /* ---------- C++ Code Block Flex Line Alignment ---------- */
   .code-block {
-    margin: 2em 0; border-radius: 7px; overflow: hidden; border: 1px solid var(--code-border);
+    margin: 1.4em 0; border-radius: 7px; overflow: hidden; border: 1px solid var(--code-border);
     background: var(--code-bg);
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
@@ -695,15 +698,16 @@
       break-after: auto; 
     }
 
-    .page-title { font-size: 2rem !important; margin-bottom: 12px !important; }
-    .page-body { font-size: 1.05rem !important; line-height: 1.8 !important; padding-bottom: 0.5in !important; }
-    .page-body h1 { margin-top: 2em !important; margin-bottom: 0.8em !important; }
-    .page-body h2 { margin-top: 2em !important; margin-bottom: 0.8em !important; }
-    .page-body h3 { margin-top: 2.2em !important; margin-bottom: 0.8em !important; }
-    .page-body hr { margin: 2.5em 0 !important; }
+    .page-title { font-size: 2rem !important; margin-bottom: 4px !important; }
+    .page-body { font-size: 1.05rem !important; line-height: 1.6 !important; padding-bottom: 0.5in !important; }
+    .page-body h1 { margin-top: 1.1em !important; margin-bottom: 0.4em !important; }
+    .page-body h2 { margin-top: 1em !important; margin-bottom: 0.3em !important; }
+    .page-body h3 { margin-top: 0.9em !important; margin-bottom: 0.3em !important; }
+    .page-body p { margin: 0.5em 0 !important; }
+    .page-body hr { margin: 1.6em 0 !important; }
 
     .code-block { 
-      margin: 1.8em 0 !important; 
+      margin: 1.4em 0 !important; 
       border-color: #3f3f46 !important; 
       width: 100% !important;
       box-sizing: border-box !important;
@@ -855,7 +859,7 @@
           <option value="H2">Subheading</option>
           <option value="H3">Section label</option>
           <option value="BLOCKQUOTE">Callout note</option>
-          <option value="ADDRESS">Little note</option>
+          <option value="ADDRESS">Little note (11px)</option>
         </select>
         <input type="number" id="sizeInput" min="6" max="120" step="1" value="16" title="Text size (px)">
         <select id="fontFamilySelect" title="Font family">
@@ -885,6 +889,7 @@
       <div class="tgroup" id="gradientGroup" style="position:relative;">
         <span style="font-size:0.7rem;color:var(--text-chrome-dim);margin-right:2px;">Grad</span>
         <button class="swatch gradient-swatch" id="gradientToggleBtn" title="Custom & preset gradient text"></button>
+        <button class="tbtn" id="removeGradBtn" title="Remove gradient from text" style="font-size:0.7rem;">✕</button>
         <div class="dropdown-panel" id="gradientPanel" style="display:none;">
           <div class="panel-section-title">⚡ Preset Gradients</div>
           <div class="preset-gradients-grid" id="presetGradientsGrid"></div>
@@ -1032,7 +1037,6 @@
       title: 'UE5 C++ Basics',
       kicker: 'Unreal Engine 5 · Actor Architecture',
       html:
-        '<p class="page-kicker-placeholder"></p>' +
         '<h2>UE5 C++ Custom Actor</h2>' +
         '<p>Below is a clean C++ starter template including Unreal reflection macros (<code>UCLASS</code>, <code>UPROPERTY</code>, <code>UFUNCTION</code>):</p>' +
         '<div class="code-block" contenteditable="false">' +
@@ -1323,6 +1327,42 @@
     });
   });
 
+  /* Gradient Stripper Function */
+  function removeGradientFromSelection() {
+    restoreSelection();
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+
+    var range = sel.getRangeAt(0);
+    var container = range.commonAncestorContainer;
+    var rootEl = container.nodeType === 1 ? container : container.parentElement;
+
+    var activeSheet = document.querySelector('.page-sheet.active');
+    if (!activeSheet) return;
+
+    var gradSpans = activeSheet.querySelectorAll('span');
+    gradSpans.forEach(function(sp) {
+      if (sp.style.webkitTextFillColor === 'transparent' || sp.style.background.indexOf('gradient') !== -1) {
+        if (sel.containsNode(sp, true) || sp.contains(rootEl)) {
+          sp.style.background = '';
+          sp.style.webkitBackgroundClip = '';
+          sp.style.webkitTextFillColor = '';
+          sp.style.display = '';
+
+          var styleAttr = sp.getAttribute('style');
+          if (!styleAttr || styleAttr.trim() === '') {
+            var parent = sp.parentNode;
+            while (sp.firstChild) {
+              parent.insertBefore(sp.firstChild, sp);
+            }
+            parent.removeChild(sp);
+          }
+        }
+      }
+    });
+    syncActivePage();
+  }
+
   function applyGradientText(gradientCSS) {
     restoreSelection();
     var sel = window.getSelection();
@@ -1429,6 +1469,7 @@
         b.style.background = hex;
         b.title = hex;
         b.addEventListener('click', function(){
+          removeGradientFromSelection();
           restoreSelection();
           currentActiveColorVal = hex;
           document.execCommand('foreColor', false, hex);
@@ -1868,6 +1909,13 @@
   headingSelectEl.addEventListener('change', function(){
     restoreSelection();
     document.execCommand('formatBlock', false, this.value);
+    
+    /* Default font size for Little Note (ADDRESS) is 11px */
+    if (this.value === 'ADDRESS') {
+      sizeInputEl.value = 11;
+      applyCustomFontSize(11);
+    }
+    
     syncActivePage();
     updateToolbarState();
   });
@@ -1910,6 +1958,7 @@
 
   document.querySelectorAll('#colorGroup [data-color]').forEach(function(sw){
     sw.addEventListener('click', function(){
+      removeGradientFromSelection();
       restoreSelection();
       currentActiveColorVal = this.dataset.color;
       document.execCommand('foreColor', false, this.dataset.color);
@@ -1921,6 +1970,7 @@
   var customColorInput = document.getElementById('customColorInput');
   document.getElementById('customColorBtn').addEventListener('click', function(){ customColorInput.click(); });
   customColorInput.addEventListener('input', function(){
+    removeGradientFromSelection();
     restoreSelection();
     currentActiveColorVal = this.value;
     document.execCommand('foreColor', false, this.value);
@@ -1937,6 +1987,10 @@
     gradientPanelEl.style.display = gradientPanelEl.style.display === 'block' ? 'none' : 'block';
   });
   gradientPanelEl.addEventListener('click', function(e){ e.stopPropagation(); });
+
+  document.getElementById('removeGradBtn').addEventListener('click', function(){
+    removeGradientFromSelection();
+  });
 
   document.getElementById('applyGradientBtn').addEventListener('click', function(){
     var css = getGradientCSS();
