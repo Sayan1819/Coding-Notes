@@ -381,7 +381,7 @@
   .code-block-head {
     background: #262a32; color: #9aa2ad; font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem; padding: 7px 14px; letter-spacing: 0.04em; text-transform: uppercase;
-    display: flex; justify-space-between; align-items: center; gap: 8px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
     user-select: none; position: relative; z-index: 5;
   }
   .code-block-head .head-left {
@@ -991,7 +991,7 @@
   function defaultIndexData(){
     return {
       title: 'Index',
-      html: '<p><br></p>'
+      html: '<h1>Index</h1><p class="toc-empty">Table of Contents will list all chapters automatically.</p><div class="toc-list" id="tocList"></div><p><br></p>'
     };
   }
 
@@ -999,7 +999,7 @@
     return [{
       id: uid(),
       title: 'Chapter 1',
-      html: '<p><br></p>'
+      html: '<h1>Chapter 1</h1><p><br></p>'
     }];
   }
 
@@ -1712,17 +1712,11 @@
     sheet.className = 'page-sheet' + (activeId === 'INDEX' ? ' active' : '');
     sheet.dataset.id = 'INDEX';
 
-    var toc = document.createElement('div');
-    toc.className = 'toc-list';
-    toc.id = 'tocList';
-    toc.setAttribute('contenteditable', 'false');
-
     var body = document.createElement('div');
     body.className = 'page-body';
     body.contentEditable = isViewMode ? 'false' : 'true';
-    body.innerHTML = indexData.html || '<p><br></p>';
+    body.innerHTML = indexData.html || '<h1>Index</h1><p class="toc-empty">Table of Contents will list all chapters automatically.</p><div class="toc-list" id="tocList"></div><p><br></p>';
 
-    sheet.appendChild(toc);
     sheet.appendChild(body);
     ensureCopyButtons(sheet);
     upgradeLegacyCodeBlocks(sheet);
@@ -1783,7 +1777,7 @@
 
   function addChapter(){
     var num = pages.length + 1;
-    var p = { id: uid(), title: 'Chapter ' + num, html: '<p><br></p>' };
+    var p = { id: uid(), title: 'Chapter ' + num, html: '<h1>Chapter ' + num + '</h1><p><br></p>' };
     pages.push(p);
     renderAll();
     setActive(p.id);
