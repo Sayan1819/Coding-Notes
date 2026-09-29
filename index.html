@@ -440,6 +440,9 @@
     line-height: 22px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
+    font-variant-ligatures: none !important;
+    -webkit-font-feature-settings: "liga" 0, "calt" 0 !important;
+    font-feature-settings: "liga" 0, "calt" 0 !important;
   }
   .code-block .line-num {
     flex: 0 0 44px;
@@ -500,13 +503,17 @@
     border: none;
     outline: none;
     resize: none;
-    white-space: pre;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: hidden;
     overflow-y: hidden;
     width: 100%;
     caret-color: var(--accent-blue);
     tab-size: 4; -moz-tab-size: 4;
     box-sizing: border-box;
+    font-variant-ligatures: none !important;
+    -webkit-font-feature-settings: "liga" 0, "calt" 0 !important;
+    font-feature-settings: "liga" 0, "calt" 0 !important;
   }
 
   .tok-keyword { color: var(--tok-keyword); }
@@ -905,24 +912,25 @@
     if (lineCodes && lineCodes.length > 0) {
       var linesArr = [];
       lineCodes.forEach(function(lc) {
-        if (lc.innerHTML === '&nbsp;' || lc.innerText === '\u00a0' || lc.textContent === '\u00a0') {
+        var text = lc.textContent;
+        if (text === '\u00a0' || text === ' ' || lc.innerHTML === '&nbsp;') {
           linesArr.push('');
         } else {
-          var text = lc.innerText.replace(/\u00a0/g, ' ');
-          linesArr.push(text);
+          linesArr.push(text.replace(/\u00a0/g, ' '));
         }
       });
       return linesArr.join('\n');
     }
 
     var codeEl = block.querySelector('code');
-    if (codeEl) return codeEl.innerText;
+    if (codeEl) return codeEl.textContent;
     return '';
   }
 
   function autoGrowTextarea(ta){
     ta.style.height = 'auto';
     ta.style.height = ta.scrollHeight + 'px';
+    ta.scrollLeft = 0;
   }
 
   function updateEditLineNumbers(ta) {
@@ -1029,13 +1037,19 @@
 
     var ta = document.createElement('textarea');
     ta.className = 'cpp-code';
-    ta.setAttribute('wrap', 'off');
     ta.spellcheck = false;
     ta.setAttribute('autocorrect', 'off');
     ta.setAttribute('autocapitalize', 'off');
     ta.setAttribute('autocomplete', 'off');
     ta.setAttribute('data-gramm', 'false');
     ta.value = raw;
+
+    // Synchronous Scroll-Lock: Prevents textarea from horizontal shifting/clipping first '/' on Enter
+    var lockScroll = function() { ta.scrollLeft = 0; };
+    ta.addEventListener('scroll', lockScroll);
+    ta.addEventListener('input', lockScroll);
+    ta.addEventListener('keyup', lockScroll);
+    ta.addEventListener('click', lockScroll);
 
     wrapper.appendChild(gutter);
     wrapper.appendChild(ta);
@@ -1044,7 +1058,7 @@
     autoGrowTextarea(ta);
     updateEditLineNumbers(ta);
 
-    setTimeout(function(){ ta.focus(); }, 10);
+    setTimeout(function(){ ta.focus(); ta.scrollLeft = 0; }, 10);
   }
 
   function exitCodeEditMode(ta) {
@@ -1977,7 +1991,7 @@
   pagesContainerEl.addEventListener('keyup', updateToolbarState);
   pagesContainerEl.addEventListener('mouseup', updateToolbarState);
 
-  /* ---------- Keyboard Navigation, Backspace Safety & VS-Style Auto-Pairing ---------- */
+  /* ---------- Keyboard Navigation, Backspace Safety & VS-Style Code Auto-Formatting ---------- */
   pagesContainerEl.addEventListener('keydown', function(e) {
     var target = e.target;
     var isCodeTA = target.tagName === 'TEXTAREA' && target.classList.contains('cpp-code');
@@ -2006,14 +2020,53 @@
       }
     }
 
-    /* VS 2026 IDE-Style Code Block Rules (Only applies inside code textareas) */
+    /* VS IDE-Style Code Block Rules (Only applies inside code textareas) */
     if (isCodeTA) {
       var block = target.closest('.code-block');
       var start = target.selectionStart;
       var end = target.selectionEnd;
       var val = target.value;
 
-      // 1. Over-type closing character (if cursor is directly in front of the closing character)
+      // 1. VS Auto-Format Semicolon: Automatically format statement line on typing ';' (e.g. float Health=100 -> float Health = 100;)
+      if (e.key === ';' && start === end) {
+        var lineStart = val.lastIndexOf('\n', start - 1) + 1;
+        var linePrefix = val.substring(lineStart, start);
+        
+        // Safety: Do not format if inside string or comment
+        var quoteMatches = linePrefix.match(/"/g) || [];
+        var isInsideString = (quoteMatches.length % 2 !== 0);
+        var isComment = linePrefix.indexOf('//') !== -1;
+
+        if (!isInsideString && !isComment) {
+          e.preventDefault();
+          
+          var lineSuffix = val.substring(end);
+          var indentMatch = linePrefix.match(/^\s*/);
+          var indent = indentMatch ? indentMatch[0] : '';
+          var body = linePrefix.substring(indent.length);
+
+          // Space multi-char operators first
+          body = body.replace(/\s*(==|!=|<=|>=|\+=|-=|\*=|\/=|\&\&|\|\|)\s*/g, ' $1 ');
+          // Space assignment operator =
+          body = body.replace(/(?<![=!<>\+\-\*\/])\s*=\s*(?![=])/g, ' = ');
+          // Space commas
+          body = body.replace(/,\s*/g, ', ');
+          // Collapse multiple consecutive spaces
+          body = body.replace(/ +/g, ' ');
+
+          var formattedLine = indent + body + ';';
+          target.value = val.substring(0, lineStart) + formattedLine + lineSuffix;
+          var newCursorPos = lineStart + formattedLine.length;
+          target.selectionStart = target.selectionEnd = newCursorPos;
+
+          updateEditLineNumbers(target);
+          autoGrowTextarea(target);
+          syncActivePage();
+          return;
+        }
+      }
+
+      // 2. Over-type closing character
       if (start === end && CLOSING_PAIRS.indexOf(e.key) !== -1) {
         if (val.charAt(start) === e.key) {
           e.preventDefault();
@@ -2022,20 +2075,18 @@
         }
       }
 
-      // 2. VS Auto-Pair Insertion: ( -> (), [ -> [], { -> {}, " -> "", ' -> ''
+      // 3. VS Auto-Pair Insertion: ( -> (), [ -> [], { -> {}, " -> "", ' -> ''
       if (AUTO_PAIRS[e.key]) {
         e.preventDefault();
         var openChar = e.key;
         var closeChar = AUTO_PAIRS[e.key];
 
         if (start !== end) {
-          // If text is highlighted/selected, wrap it!
           var selectedText = val.substring(start, end);
           target.value = val.substring(0, start) + openChar + selectedText + closeChar + val.substring(end);
           target.selectionStart = start + 1;
           target.selectionEnd = end + 1;
         } else {
-          // Insert pair and keep cursor in the middle
           target.value = val.substring(0, start) + openChar + closeChar + val.substring(end);
           target.selectionStart = target.selectionEnd = start + 1;
         }
@@ -2046,7 +2097,7 @@
         return;
       }
 
-      // 3. VS Auto-Pair Backspace Deletion: Deletes both opening & closing pair if cursor is in between
+      // 4. VS Auto-Pair Backspace Deletion
       if (e.key === 'Backspace' && start === end && start > 0) {
         var charBefore = val.charAt(start - 1);
         var charAfter = val.charAt(start);
@@ -2062,14 +2113,14 @@
         }
       }
 
-      // Obsidian shortcut 1: Ctrl + Enter or Cmd + Enter immediately exits code block
+      // 5. Exit Shortcut: Ctrl + Enter or Cmd + Enter immediately exits code block
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         if (block) exitCodeBlockToNewParagraph(block, target);
         return;
       }
 
-      // Obsidian shortcut 2: Shift + Enter on last line exits code block
+      // 6. Exit Shortcut: Shift + Enter on last line exits code block
       if (e.shiftKey && e.key === 'Enter') {
         var linesAfterCaret = val.substring(end).split('\n');
         if (linesAfterCaret.length <= 1) {
@@ -2079,21 +2130,7 @@
         }
       }
 
-      // Obsidian shortcut 3: Enter on an empty last line exits code block
-      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-        if (start === end && val.substring(start) === '') {
-          var lines = val.split('\n');
-          if (lines.length > 1 && lines[lines.length - 1] === '') {
-            e.preventDefault();
-            lines.pop(); // Remove trailing empty line
-            target.value = lines.join('\n');
-            if (block) exitCodeBlockToNewParagraph(block, target);
-            return;
-          }
-        }
-      }
-
-      // Obsidian shortcut 4: Down Arrow on last line exits code block
+      // 7. Arrow Navigation: Down Arrow on last line exits code block
       if (e.key === 'ArrowDown') {
         var restOfText = val.substring(end);
         if (restOfText.indexOf('\n') === -1) {
@@ -2103,7 +2140,7 @@
         }
       }
 
-      // Obsidian shortcut 5: Up Arrow on top line exits to paragraph above
+      // 8. Arrow Navigation: Up Arrow on top line exits to paragraph above
       if (e.key === 'ArrowUp') {
         var textBeforeCaret = val.substring(0, start);
         if (textBeforeCaret.indexOf('\n') === -1) {
@@ -2261,6 +2298,7 @@
     var isCodeTA = e.target.classList && e.target.classList.contains('cpp-code') && e.target.tagName === 'TEXTAREA';
     if (isCodeTA) {
       var ta = e.target;
+      ta.scrollLeft = 0;
       if (codeInputRAF) cancelAnimationFrame(codeInputRAF);
       codeInputRAF = requestAnimationFrame(function(){
         updateEditLineNumbers(ta);
