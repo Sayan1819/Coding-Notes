@@ -425,9 +425,8 @@
     opacity: 0.6;
   }
 
-  .code-block-head .copy-code-btn {
+  .code-block-head .copy-code-btn, .code-block-head .delete-code-btn {
     flex-shrink: 0;
-    margin-left: auto;
     background: #2b303b;
     border: 1px solid #4a5263;
     border-radius: 4px;
@@ -435,7 +434,7 @@
     font-family: 'Space Grotesk', sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
-    padding: 4px 12px;
+    padding: 4px 10px;
     cursor: pointer;
     transition: all 0.15s ease;
     display: inline-flex;
@@ -450,6 +449,17 @@
     color: #0d1b22;
     border-color: var(--accent-blue);
     box-shadow: 0 0 8px rgba(76, 194, 255, 0.4);
+  }
+  .code-block-head .delete-code-btn {
+    color: #ff6b6b;
+    border-color: #633339;
+    margin-left: 4px;
+  }
+  .code-block-head .delete-code-btn:hover {
+    background: #ff6b6b;
+    color: #0d1b22;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
   }
 
   .code-block .code-container {
@@ -570,6 +580,7 @@
   body.view-mode .toolbar .tgroup { display: none; }
   body.view-mode .page-body { cursor: default; }
   body.view-mode input.code-filename { pointer-events: none; cursor: default; opacity: 0.85; }
+  body.view-mode .delete-code-btn { display: none !important; }
 
   .mode-switch-container {
     position: fixed;
@@ -636,7 +647,7 @@
       width: 100% !important;
     }
 
-    .sidebar, .toolbar, .mode-switch-container, .copy-code-btn { 
+    .sidebar, .toolbar, .mode-switch-container, .copy-code-btn, .delete-code-btn { 
       display: none !important; 
     }
 
@@ -1093,7 +1104,6 @@
     if (lineCodes && lineCodes.length > 0) {
       var linesArr = [];
       lineCodes.forEach(function(lc) {
-        // Fix: Do not convert placeholder non-breaking space (&nbsp;) into a literal space character
         if (lc.innerHTML === '&nbsp;' || lc.innerText === '\u00a0' || lc.textContent === '\u00a0') {
           linesArr.push('');
         } else {
@@ -1170,6 +1180,16 @@
         btn.title = 'Copy code to clipboard';
         btn.innerHTML = '📋 Copy';
         head.appendChild(btn);
+      }
+
+      var existingDelBtn = head.querySelector('.delete-code-btn');
+      if (!existingDelBtn) {
+        var delBtn = document.createElement('button');
+        delBtn.className = 'delete-code-btn';
+        delBtn.type = 'button';
+        delBtn.title = 'Delete code block';
+        delBtn.innerHTML = '🗑️ Delete';
+        head.appendChild(delBtn);
       }
     });
   }
@@ -2043,7 +2063,7 @@
     var defaultText = '';
     var html =
       '<div class="code-block" contenteditable="false">' +
-        '<div class="code-block-head"><div class="head-left"><span class="code-lang-label">C++</span> <span class="code-sep">·</span> <input class="code-filename" type="text" value="" placeholder="filename.h" spellcheck="false"></div><button class="copy-code-btn" type="button" title="Copy code to clipboard">📋 Copy</button></div>' +
+        '<div class="code-block-head"><div class="head-left"><span class="code-lang-label">C++</span> <span class="code-sep">·</span> <input class="code-filename" type="text" value="" placeholder="filename.h" spellcheck="false"></div><button class="copy-code-btn" type="button" title="Copy code to clipboard">📋 Copy</button><button class="delete-code-btn" type="button" title="Delete code block">🗑️ Delete</button></div>' +
         '<div class="code-container">' + buildCodeLinesHTML(defaultText) + '</div>' +
       '</div><p><br></p>';
     document.execCommand('insertHTML', false, html);
@@ -2122,6 +2142,21 @@
   pagesContainerEl.addEventListener('keyup', updateToolbarState);
   pagesContainerEl.addEventListener('mouseup', updateToolbarState);
 
+  function isCaretAtStartOfBlock(sel, blockEl) {
+    if (!sel || !sel.rangeCount) return false;
+    var range = sel.getRangeAt(0);
+    if (!range.collapsed) return false;
+    try {
+      var testRange = document.createRange();
+      testRange.selectNodeContents(blockEl);
+      testRange.setEnd(range.startContainer, range.startOffset);
+      var textBefore = testRange.toString().replace(/\u00a0/g, ' ').replace(/[\r\n]/g, '');
+      return textBefore.length === 0;
+    } catch(e) {
+      return false;
+    }
+  }
+
   pagesContainerEl.addEventListener('keydown', function(e) {
     if (e.key === 'Tab') {
       var target = e.target;
@@ -2147,6 +2182,84 @@
         document.execCommand('insertText', false, '    ');
         syncActivePage();
         return;
+      }
+    }
+
+    // Guard against accidental double deletion when pressing Backspace in paragraphs adjacent to code blocks
+    if ((e.key === 'Backspace' || e.key === 'Delete') && e.target.tagName !== 'TEXTAREA') {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount) {
+        var range = sel.getRangeAt(0);
+        var container = range.startContainer;
+        var editable = container.nodeType === 1 ? container.closest('[contenteditable="true"]') : (container.parentElement ? container.parentElement.closest('[contenteditable="true"]') : null);
+
+        if (editable) {
+          var blockEl = container.nodeType === 3 ? container.parentElement : container;
+          while (blockEl && blockEl.parentElement !== editable && blockEl !== editable) {
+            blockEl = blockEl.parentElement;
+          }
+
+          if (blockEl && blockEl !== editable) {
+            if (e.key === 'Backspace') {
+              if (isCaretAtStartOfBlock(sel, blockEl)) {
+                var prevElem = blockEl.previousElementSibling;
+                if (prevElem && prevElem.classList.contains('code-block')) {
+                  e.preventDefault();
+                  
+                  var blockText = blockEl.innerText.replace(/[\r\n\s\u00a0]/g, '');
+                  if (blockText === '') {
+                    var nextElem = blockEl.nextElementSibling;
+                    if (nextElem) {
+                      blockEl.remove();
+                      var r = document.createRange();
+                      r.setStart(nextElem, 0);
+                      r.collapse(true);
+                      sel.removeAllRanges();
+                      sel.addRange(r);
+                    } else {
+                      enterCodeEditMode(prevElem);
+                      var ta = prevElem.querySelector('textarea.cpp-code');
+                      if (ta) {
+                        ta.focus();
+                        ta.selectionStart = ta.selectionEnd = ta.value.length;
+                      }
+                    }
+                  } else {
+                    enterCodeEditMode(prevElem);
+                    var ta = prevElem.querySelector('textarea.cpp-code');
+                    if (ta) {
+                      ta.focus();
+                      ta.selectionStart = ta.selectionEnd = ta.value.length;
+                    }
+                  }
+                  syncActivePage();
+                  return;
+                }
+              }
+            } else if (e.key === 'Delete') {
+              try {
+                var testRange = document.createRange();
+                testRange.selectNodeContents(blockEl);
+                testRange.setStart(range.endContainer, range.endOffset);
+                var textAfter = testRange.toString().replace(/\u00a0/g, ' ').replace(/[\r\n]/g, '');
+                if (textAfter.length === 0) {
+                  var nextElem = blockEl.nextElementSibling;
+                  if (nextElem && nextElem.classList.contains('code-block')) {
+                    e.preventDefault();
+                    enterCodeEditMode(nextElem);
+                    var ta = nextElem.querySelector('textarea.cpp-code');
+                    if (ta) {
+                      ta.focus();
+                      ta.selectionStart = ta.selectionEnd = 0;
+                    }
+                    syncActivePage();
+                    return;
+                  }
+                }
+              } catch(err) {}
+            }
+          }
+        }
       }
     }
   });
@@ -2207,6 +2320,20 @@
       e.stopPropagation();
       var block = copyBtn.closest('.code-block');
       if (block) copyCodeFromBlock(block, copyBtn);
+      return;
+    }
+
+    var deleteBtn = e.target.closest && e.target.closest('.delete-code-btn');
+    if (deleteBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var block = deleteBtn.closest('.code-block');
+      if (block) {
+        if (confirm('Delete this code block?')) {
+          block.remove();
+          syncActivePage();
+        }
+      }
       return;
     }
 
