@@ -335,6 +335,25 @@
   
   /* Obsidian-style Paragraph Spacing */
   .page-body p { margin: 4px 0; min-height: 1.4em; }
+  
+  /* Little Note Default Styling (11px, Light Gray, Uppercase) */
+  .page-body address {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9aa2ad;
+    margin: 6px 0 2px 0;
+    line-height: 1.4;
+    display: block;
+  }
+  .page-body address * {
+    font-style: normal;
+    text-transform: uppercase;
+  }
+
   .page-body blockquote {
     margin: 0.8em 0; padding: 10px 16px; background: #14120a;
     border-left: 3px solid var(--accent-amber); font-style: italic; color: #e3c98d;
@@ -879,7 +898,7 @@
       while ((match = tagRegex.exec(lineContent)) !== null) {
         var tag = match[0];
         if (tag.indexOf('</') === 0) {
-          if (currentLineOpenTags.length> 0) currentLineOpenTags.pop();
+          if (currentLineOpenTags.length > 0) currentLineOpenTags.pop();
         } else {
           currentLineOpenTags.push(tag);
         }
@@ -1728,11 +1747,25 @@
   headingSelectEl.addEventListener('mousedown', saveCurrentSelection);
   headingSelectEl.addEventListener('change', function(){
     restoreSelection();
-    document.execCommand('formatBlock', false, this.value);
+    var tag = this.value;
+    document.execCommand('formatBlock', false, '<' + tag + '>');
     
-    if (this.value === 'ADDRESS') {
+    if (tag === 'ADDRESS') {
       sizeInputEl.value = 11;
-      applyCustomFontSize(11);
+      var sel = window.getSelection();
+      if (sel && sel.anchorNode) {
+        var node = sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement;
+        var addr = node ? node.closest('address') : null;
+        if (addr) {
+          addr.querySelectorAll('font, span').forEach(function(el) {
+            el.style.fontSize = '';
+            el.style.color = '';
+            el.style.webkitTextFillColor = '';
+            el.removeAttribute('color');
+            el.removeAttribute('size');
+          });
+        }
+      }
     }
     
     syncActivePage();
