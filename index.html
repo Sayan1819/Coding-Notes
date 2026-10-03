@@ -810,7 +810,7 @@
             </select>
           </div>
 
-          <div class="panel-section-title">👁️️ Live Preview</div>
+          <div class="panel-section-title">👁 Live Preview</div>
           <div class="gradient-preview-bar" id="gradPreviewBar"></div>
           <div class="gradient-text-preview-box" id="gradTextPreviewSample">Sample Gradient Text</div>
 
@@ -2320,6 +2320,51 @@
         return;
       }
 
+      /* Exit Shortcuts (Ctrl+Enter / Cmd+Enter) */
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (block) exitCodeBlockToNewParagraph(block, target);
+        return;
+      }
+
+      /* Smart Auto-Indentation on Enter */
+      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+
+        var lineStart = val.lastIndexOf('\n', start - 1) + 1;
+        var linePrefix = val.substring(lineStart, start);
+        var indentMatch = linePrefix.match(/^\s*/);
+        var currentIndent = indentMatch ? indentMatch[0] : '';
+
+        var charBefore = val.charAt(start - 1);
+        var charAfter = val.charAt(start);
+
+        // Case 1: Enter pressed directly between { and }
+        if (charBefore === '{' && charAfter === '}') {
+          var extraIndent = '    ';
+          var insertText = '\n' + currentIndent + extraIndent + '\n' + currentIndent;
+          target.value = val.substring(0, start) + insertText + val.substring(end);
+          
+          var newCursorPos = start + 1 + currentIndent.length + extraIndent.length;
+          target.selectionStart = target.selectionEnd = newCursorPos;
+        } 
+        // Case 2: Enter pressed on any indented line or after opening {
+        else {
+          var opensBlock = linePrefix.trim().endsWith('{');
+          var nextIndent = currentIndent + (opensBlock ? '    ' : '');
+          var insertText = '\n' + nextIndent;
+
+          target.value = val.substring(0, start) + insertText + val.substring(end);
+          var newCursorPos = start + insertText.length;
+          target.selectionStart = target.selectionEnd = newCursorPos;
+        }
+
+        updateEditLineNumbers(target);
+        autoGrowTextarea(target);
+        syncActivePage();
+        return;
+      }
+
       if (e.key === ';' && start === end) {
         var lineStart = val.lastIndexOf('\n', start - 1) + 1;
         var linePrefix = val.substring(lineStart, start);
@@ -2395,12 +2440,6 @@
           syncActivePage();
           return;
         }
-      }
-
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        if (block) exitCodeBlockToNewParagraph(block, target);
-        return;
       }
 
       if (e.shiftKey && e.key === 'Enter') {
