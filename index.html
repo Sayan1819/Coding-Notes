@@ -553,7 +553,7 @@
     opacity: 0.4;
     user-select: none;
     border-right: 1px solid rgba(255,255,255,0.05);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 22px;
   }
   .code-block .line-code {
@@ -581,7 +581,7 @@
     padding: 0 12px 0 0;
     margin: 0;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 22px;
     color: var(--tok-preproc);
     opacity: 0.4;
@@ -810,7 +810,7 @@
             </select>
           </div>
 
-          <div class="panel-section-title">👁️ Live Preview</div>
+          <div class="panel-section-title">👁️️ Live Preview</div>
           <div class="gradient-preview-bar" id="gradPreviewBar"></div>
           <div class="gradient-text-preview-box" id="gradTextPreviewSample">Sample Gradient Text</div>
 
@@ -1025,7 +1025,29 @@
   function autoGrowTextarea(ta){
     ta.style.height = 'auto';
     ta.style.height = ta.scrollHeight + 'px';
-    ta.scrollLeft = 0;
+  }
+
+  var lineMeasurer = null;
+  function getLineMeasurer() {
+    if (!lineMeasurer) {
+      lineMeasurer = document.createElement('div');
+      lineMeasurer.style.position = 'absolute';
+      lineMeasurer.style.visibility = 'hidden';
+      lineMeasurer.style.top = '-9999px';
+      lineMeasurer.style.left = '-9999px';
+      lineMeasurer.style.height = 'auto';
+      lineMeasurer.style.fontFamily = "'JetBrains Mono', monospace";
+      lineMeasurer.style.fontSize = '14px';
+      lineMeasurer.style.lineHeight = '22px';
+      lineMeasurer.style.whiteSpace = 'pre-wrap';
+      lineMeasurer.style.wordBreak = 'break-word';
+      lineMeasurer.style.tabSize = '4';
+      lineMeasurer.style.padding = '0';
+      lineMeasurer.style.border = 'none';
+      lineMeasurer.style.boxSizing = 'border-box';
+      document.body.appendChild(lineMeasurer);
+    }
+    return lineMeasurer;
   }
 
   function updateEditLineNumbers(ta) {
@@ -1033,11 +1055,51 @@
     if (!wrapper) return;
     var gutter = wrapper.querySelector('.line-numbers');
     if (!gutter) return;
-    var lineCount = ta.value.split('\n').length;
-    var nums = [];
-    for (var i = 1; i <= lineCount; i++) nums.push(i);
-    gutter.textContent = nums.join('\n');
+
+    var lines = ta.value.split('\n');
+    var computed = window.getComputedStyle(ta);
+    var padLeft = parseFloat(computed.paddingLeft) || 12;
+    var padRight = parseFloat(computed.paddingRight) || 12;
+    var contentWidth = ta.clientWidth - padLeft - padRight;
+
+    if (contentWidth <= 0) {
+      var simpleNums = [];
+      for (var k = 1; k <= lines.length; k++) simpleNums.push(k);
+      gutter.textContent = simpleNums.join('\n');
+      return;
+    }
+
+    var measurer = getLineMeasurer();
+    measurer.style.width = contentWidth + 'px';
+
+    var gutterText = '';
+    for (var i = 0; i < lines.length; i++) {
+      var lineNum = i + 1;
+      var lineStr = lines[i];
+      
+      measurer.textContent = lineStr || ' ';
+      var h = measurer.offsetHeight;
+      var visualCount = Math.max(1, Math.round(h / 22));
+
+      gutterText += lineNum;
+      for (var v = 0; v < visualCount; v++) {
+        gutterText += '\n';
+      }
+    }
+
+    if (gutterText.endsWith('\n')) {
+      gutterText = gutterText.slice(0, -1);
+    }
+
+    gutter.textContent = gutterText;
   }
+
+  window.addEventListener('resize', function() {
+    document.querySelectorAll('textarea.cpp-code').forEach(function(ta) {
+      updateEditLineNumbers(ta);
+      autoGrowTextarea(ta);
+    });
+  });
 
   function ensureCopyButtons(root) {
     (root || document).querySelectorAll('.code-block').forEach(function(block) {
@@ -1139,12 +1201,6 @@
     ta.setAttribute('data-gramm', 'false');
     ta.value = raw;
 
-    var lockScroll = function() { ta.scrollLeft = 0; };
-    ta.addEventListener('scroll', lockScroll);
-    ta.addEventListener('input', lockScroll);
-    ta.addEventListener('keyup', lockScroll);
-    ta.addEventListener('click', lockScroll);
-
     wrapper.appendChild(gutter);
     wrapper.appendChild(ta);
 
@@ -1152,7 +1208,7 @@
     autoGrowTextarea(ta);
     updateEditLineNumbers(ta);
 
-    setTimeout(function(){ ta.focus(); ta.scrollLeft = 0; }, 10);
+    setTimeout(function(){ ta.focus(); }, 10);
   }
 
   function exitCodeEditMode(ta) {
@@ -2534,7 +2590,6 @@
     var isCodeTA = e.target.classList && e.target.classList.contains('cpp-code') && e.target.tagName === 'TEXTAREA';
     if (isCodeTA) {
       var ta = e.target;
-      ta.scrollLeft = 0;
       if (codeInputRAF) cancelAnimationFrame(codeInputRAF);
       codeInputRAF = requestAnimationFrame(function(){
         updateEditLineNumbers(ta);
