@@ -332,7 +332,7 @@
   .page-body h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; margin: 0.7em 0 0.2em; color: var(--accent-blue); }
   
   .page-body p, 
-  .page-body div:not(.code-block):not(.notebook-img-box):not(.code-container):not(.code-line):not(.code-edit-wrapper):not(.toc-list):not(.toc-item) { 
+  .page-body div:not(.code-block):not(.text-block):not(.notebook-img-box):not(.code-container):not(.code-line):not(.code-edit-wrapper):not(.code-editor-stage):not(.text-block-content):not(.toc-list):not(.toc-item) { 
     margin: 4px 0; 
     min-height: 1.4em;
     line-height: 1.5;
@@ -560,6 +560,7 @@
     flex: 1 1 auto;
     min-width: 0;
     padding-left: 12px;
+    padding-right: 12px;
     white-space: pre-wrap;
     word-break: break-word;
     color: var(--code-text);
@@ -567,6 +568,7 @@
     line-height: 22px;
   }
 
+  /* Live Syntax Highlighted Editor */
   .code-edit-wrapper {
     display: flex;
     align-items: stretch;
@@ -590,30 +592,175 @@
     white-space: pre;
     overflow: hidden;
   }
-  .code-edit-wrapper textarea.cpp-code {
+  .code-editor-stage {
+    position: relative;
     flex: 1 1 auto;
     min-width: 0;
-    padding: 0 12px;
+    display: grid;
+  }
+  .code-editor-stage pre.code-highlight-backdrop,
+  .code-editor-stage textarea.cpp-code {
+    grid-area: 1 / 1;
     margin: 0;
+    padding: 0 12px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0px;
     line-height: 22px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    box-sizing: border-box;
+    border: none;
+    width: 100%;
+    min-height: 22px;
+    font-variant-ligatures: none !important;
+    -webkit-font-feature-settings: "liga" 0, "calt" 0 !important;
+    font-feature-settings: "liga" 0, "calt" 0 !important;
+  }
+  .code-editor-stage pre.code-highlight-backdrop {
     color: var(--code-text);
+    background: transparent;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .code-editor-stage textarea.cpp-code {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background: transparent;
+    caret-color: var(--accent-blue);
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    z-index: 2;
+  }
+  .code-editor-stage textarea.cpp-code::selection {
+    background: rgba(76, 194, 255, 0.28);
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ---------- Plain Text Box ---------- */
+  .text-block {
+    margin: 8px 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    cursor: text;
+    position: relative;
+    transition: border-color 0.15s ease;
+  }
+  .text-block:hover {
+    border-color: #3f4450;
+  }
+  .text-block + .text-block { margin-top: 8px; }
+  .text-block + p { margin-top: 2px; margin-bottom: 2px; }
+  p + .text-block { margin-top: 2px; }
+
+  .text-block-head {
+    background: #1e2128;
+    color: var(--text-chrome-dim);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.72rem;
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .text-block-head .head-left {
+    display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
+  }
+  .text-block-label {
+    color: var(--accent-amber);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .text-block-head .code-sep { opacity: 0.3; }
+  .text-block-head input.text-block-title {
+    background: transparent;
+    border: none;
+    color: var(--text-chrome);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    padding: 1px 4px;
+    outline: none;
+    width: auto;
+    max-width: 320px;
+  }
+  .text-block-head input.text-block-title::placeholder {
+    color: var(--text-chrome-dim); opacity: 0.5;
+  }
+
+  .text-block-head .copy-text-btn, .text-block-head .delete-text-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-chrome-dim);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    opacity: 0.6;
+  }
+  .text-block:hover .copy-text-btn, .text-block:hover .delete-text-btn {
+    opacity: 1;
+  }
+  .text-block-head .copy-text-btn:hover {
+    color: var(--accent-blue); background: rgba(76, 194, 255, 0.1);
+  }
+  .text-block-head .delete-text-btn:hover {
+    color: #ff6b6b; background: rgba(255, 107, 107, 0.1);
+  }
+
+  .text-block-content {
+    padding: 12px 14px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 44px;
+  }
+  .text-block-content:empty::before {
+    content: "Click to write plain text...";
+    color: var(--text-chrome-dim);
+    opacity: 0.45;
+    font-style: italic;
+  }
+
+  textarea.plain-text-area {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    margin: 0;
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--ink);
     background: transparent;
     border: none;
     outline: none;
     resize: none;
     white-space: pre-wrap;
     word-break: break-word;
-    overflow-x: hidden;
-    overflow-y: hidden;
-    width: 100%;
+    overflow: hidden;
     caret-color: var(--accent-blue);
-    tab-size: 4; -moz-tab-size: 4;
     box-sizing: border-box;
-    font-variant-ligatures: none !important;
-    -webkit-font-feature-settings: "liga" 0, "calt" 0 !important;
-    font-feature-settings: "liga" 0, "calt" 0 !important;
+    min-height: 44px;
   }
 
   .tok-keyword { color: var(--tok-keyword); }
@@ -636,8 +783,8 @@
 
   body.view-mode .toolbar .tgroup { display: none; }
   body.view-mode .page-body { cursor: default; }
-  body.view-mode input.code-filename { pointer-events: none; cursor: default; opacity: 0.85; }
-  body.view-mode .delete-code-btn, body.view-mode .delete-img-btn { display: none !important; }
+  body.view-mode input.code-filename, body.view-mode input.text-block-title { pointer-events: none; cursor: default; opacity: 0.85; }
+  body.view-mode .delete-code-btn, body.view-mode .delete-text-btn, body.view-mode .delete-img-btn { display: none !important; }
 
   .mode-switch-container {
     position: fixed;
@@ -673,7 +820,7 @@
     @page { size: letter portrait; margin: 0 !important; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; caret-color: transparent !important; }
     html, body { background: #000000 !important; overflow: visible !important; height: auto !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-    .sidebar, .toolbar, .mode-switch-container, .copy-code-btn, .delete-code-btn, .delete-img-btn { display: none !important; }
+    .sidebar, .toolbar, .mode-switch-container, .copy-code-btn, .delete-code-btn, .copy-text-btn, .delete-text-btn, .delete-img-btn { display: none !important; }
     .app, .main-col, .canvas { display: block !important; height: auto !important; padding: 0 !important; margin: 0 !important; background: #000000 !important; width: 100% !important; }
     .pages-container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
     .page-sheet { display: none; width: 100% !important; max-width: 100% !important; padding: 0.6in 0.75in 1in !important; margin: 0 !important; box-shadow: none !important; border: none !important; background: #000000 !important; min-height: 100vh !important; }
@@ -681,7 +828,7 @@
     body.print-all .page-sheet { display: block !important; page-break-after: always; break-after: page; }
     body.print-all .page-sheet:last-of-type { page-break-after: auto; break-after: auto; }
     .page-body { font-size: 1.05rem !important; line-height: 1.6 !important; padding-bottom: 0.5in !important; }
-    .code-block { margin: 0.6em 0 !important; border-color: #3f3f46 !important; width: 100% !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+    .code-block, .text-block { margin: 0.6em 0 !important; border-color: #3f3f46 !important; width: 100% !important; page-break-inside: avoid !important; break-inside: avoid !important; }
   }
 </style>
 </head>
@@ -859,6 +1006,7 @@
 
       <div class="tgroup">
         <button class="tbtn" id="insertCodeBtn" title="Insert C++ code block">&lt;/&gt;</button>
+        <button class="tbtn" id="insertTextBoxBtn" title="Insert plain text box">📄 Text</button>
         <button class="tbtn" id="insertImgBtn" title="Upload Image Screenshot">🖼️ Img</button>
         <input type="file" id="imageFileInput" accept="image/*" style="display:none">
         <button class="tbtn" id="insertHrBtn" title="Insert solid divider">―</button>
@@ -1027,6 +1175,17 @@
     ta.style.height = ta.scrollHeight + 'px';
   }
 
+  function syncLiveHighlight(ta) {
+    var stage = ta.closest('.code-editor-stage');
+    if (!stage) return;
+    var backdrop = stage.querySelector('pre.code-highlight-backdrop');
+    if (!backdrop) return;
+    var val = ta.value;
+    // Trailing newline needs a space so the pre matches textarea height on empty trailing lines
+    var html = highlightCode(val) + (val.endsWith('\n') ? ' ' : '');
+    backdrop.innerHTML = html || '&nbsp;';
+  }
+
   var lineMeasurer = null;
   function getLineMeasurer() {
     if (!lineMeasurer) {
@@ -1099,6 +1258,9 @@
       updateEditLineNumbers(ta);
       autoGrowTextarea(ta);
     });
+    document.querySelectorAll('textarea.plain-text-area').forEach(function(ta) {
+      autoGrowTextarea(ta);
+    });
   });
 
   function ensureCopyButtons(root) {
@@ -1158,13 +1320,70 @@
         head.appendChild(delBtn);
       }
     });
+
+    (root || document).querySelectorAll('.text-block').forEach(function(block) {
+      var head = block.querySelector('.text-block-head');
+      if (!head) {
+        head = document.createElement('div');
+        head.className = 'text-block-head';
+        block.insertBefore(head, block.firstChild);
+      }
+
+      var headLeft = head.querySelector('.head-left');
+      if (!headLeft) {
+        headLeft = document.createElement('div');
+        headLeft.className = 'head-left';
+        head.insertBefore(headLeft, head.firstChild);
+      }
+
+      var labelEl = headLeft.querySelector('.text-block-label');
+      if (!labelEl) {
+        labelEl = document.createElement('span');
+        labelEl.className = 'text-block-label';
+        labelEl.textContent = 'TEXT';
+        headLeft.insertBefore(labelEl, headLeft.firstChild);
+
+        var sep = document.createElement('span');
+        sep.className = 'code-sep';
+        sep.textContent = '·';
+        headLeft.appendChild(sep);
+
+        var titleInput = document.createElement('input');
+        titleInput.className = 'text-block-title';
+        titleInput.type = 'text';
+        titleInput.value = '';
+        titleInput.placeholder = 'Optional title...';
+        titleInput.spellcheck = true;
+        headLeft.appendChild(titleInput);
+      }
+
+      var existingBtn = head.querySelector('.copy-text-btn');
+      if (!existingBtn) {
+        var btn = document.createElement('button');
+        btn.className = 'copy-text-btn';
+        btn.type = 'button';
+        btn.title = 'Copy text';
+        btn.innerHTML = 'Copy';
+        head.appendChild(btn);
+      }
+
+      var existingDelBtn = head.querySelector('.delete-text-btn');
+      if (!existingDelBtn) {
+        var delBtn = document.createElement('button');
+        delBtn.className = 'delete-text-btn';
+        delBtn.type = 'button';
+        delBtn.title = 'Delete text box';
+        delBtn.innerHTML = '✕';
+        head.appendChild(delBtn);
+      }
+    });
   }
 
   function upgradeLegacyCodeBlocks(root) {
     (root || document).querySelectorAll('.code-block').forEach(function(block) {
       var pre = block.querySelector('pre');
       var code = block.querySelector('code');
-      if (pre && code) {
+      if (pre && code && !pre.classList.contains('code-highlight-backdrop')) {
         var raw = code.innerText;
         var container = document.createElement('div');
         container.className = 'code-container';
@@ -1192,6 +1411,13 @@
     var gutter = document.createElement('pre');
     gutter.className = 'line-numbers';
 
+    var stage = document.createElement('div');
+    stage.className = 'code-editor-stage';
+
+    var backdrop = document.createElement('pre');
+    backdrop.className = 'code-highlight-backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+
     var ta = document.createElement('textarea');
     ta.className = 'cpp-code';
     ta.spellcheck = false;
@@ -1201,10 +1427,14 @@
     ta.setAttribute('data-gramm', 'false');
     ta.value = raw;
 
+    stage.appendChild(backdrop);
+    stage.appendChild(ta);
+
     wrapper.appendChild(gutter);
-    wrapper.appendChild(ta);
+    wrapper.appendChild(stage);
 
     block.replaceChild(wrapper, container);
+    syncLiveHighlight(ta);
     autoGrowTextarea(ta);
     updateEditLineNumbers(ta);
 
@@ -1226,8 +1456,53 @@
     syncActivePage();
   }
 
+  /* ---------- Plain Text Box Edit / View Helpers ---------- */
+  function getRawTextFromTextBlock(block) {
+    var ta = block.querySelector('textarea.plain-text-area');
+    if (ta) return ta.value;
+    var content = block.querySelector('.text-block-content');
+    if (content) return content.textContent || '';
+    return '';
+  }
+
+  function enterTextBlockEditMode(block) {
+    if (isViewMode) return;
+    var content = block.querySelector('.text-block-content');
+    if (!content) return;
+
+    var raw = content.textContent || '';
+    var ta = document.createElement('textarea');
+    ta.className = 'plain-text-area';
+    ta.placeholder = 'Write plain text here...';
+    ta.value = raw;
+
+    block.replaceChild(ta, content);
+    autoGrowTextarea(ta);
+
+    setTimeout(function(){ ta.focus(); }, 10);
+  }
+
+  function exitTextBlockEditMode(ta) {
+    var block = ta.closest('.text-block');
+    if (!block) return;
+
+    var raw = ta.value;
+    var content = document.createElement('div');
+    content.className = 'text-block-content';
+    content.textContent = raw;
+
+    block.replaceChild(content, ta);
+    syncActivePage();
+  }
+
   function exitCodeBlockToNewParagraph(block, targetTextarea) {
-    if (targetTextarea) exitCodeEditMode(targetTextarea);
+    if (targetTextarea) {
+      if (targetTextarea.classList.contains('plain-text-area')) {
+        exitTextBlockEditMode(targetTextarea);
+      } else {
+        exitCodeEditMode(targetTextarea);
+      }
+    }
     var p = block.nextElementSibling;
     if (!p || p.tagName !== 'P') {
       p = document.createElement('p');
@@ -1249,7 +1524,13 @@
   }
 
   function exitCodeBlockToPreviousParagraph(block, targetTextarea) {
-    if (targetTextarea) exitCodeEditMode(targetTextarea);
+    if (targetTextarea) {
+      if (targetTextarea.classList.contains('plain-text-area')) {
+        exitTextBlockEditMode(targetTextarea);
+      } else {
+        exitCodeEditMode(targetTextarea);
+      }
+    }
     var prev = block.previousElementSibling;
     if (!prev || prev.tagName !== 'P') {
       var p = document.createElement('p');
@@ -1843,11 +2124,15 @@
       exitCodeEditMode(ta);
     });
 
+    document.querySelectorAll('textarea.plain-text-area').forEach(function(ta){
+      exitTextBlockEditMode(ta);
+    });
+
     document.querySelectorAll('.page-body').forEach(function(el){
       el.contentEditable = view ? 'false' : 'true';
     });
 
-    document.querySelectorAll('input.code-filename').forEach(function(inp){
+    document.querySelectorAll('input.code-filename, input.text-block-title').forEach(function(inp){
       inp.disabled = view;
       inp.readOnly = view;
     });
@@ -2093,6 +2378,28 @@
     syncActivePage();
   });
 
+  /* Insert Plain Text Box */
+  document.getElementById('insertTextBoxBtn').addEventListener('click', function(){
+    restoreSelection();
+    var html =
+      '<div class="text-block" contenteditable="false">' +
+        '<div class="text-block-head"><div class="head-left"><span class="text-block-label">TEXT</span> <span class="code-sep">·</span> <input class="text-block-title" type="text" value="" placeholder="Optional title..." spellcheck="true"></div><button class="copy-text-btn" type="button" title="Copy text">Copy</button><button class="delete-text-btn" type="button" title="Delete text box">✕</button></div>' +
+        '<div class="text-block-content"></div>' +
+      '</div>';
+    document.execCommand('insertHTML', false, html);
+    ensureCopyButtons();
+
+    var activeSheet = document.querySelector('.page-sheet.active');
+    if (activeSheet) {
+      var blocks = activeSheet.querySelectorAll('.text-block');
+      if (blocks.length > 0) {
+        var lastBlock = blocks[blocks.length - 1];
+        enterTextBlockEditMode(lastBlock);
+      }
+    }
+    syncActivePage();
+  });
+
   /* Image Upload & Clipboard Paste Handler */
   var imageFileInputEl = document.getElementById('imageFileInput');
   document.getElementById('insertImgBtn').addEventListener('click', function(){
@@ -2203,9 +2510,44 @@
   pagesContainerEl.addEventListener('keydown', function(e) {
     var target = e.target;
     var isCodeTA = target.tagName === 'TEXTAREA' && target.classList.contains('cpp-code');
+    var isPlainTextTA = target.tagName === 'TEXTAREA' && target.classList.contains('plain-text-area');
+
+    /* Plain Text Box Keyboard Shortcuts */
+    if (isPlainTextTA) {
+      var textBlock = target.closest('.text-block');
+      var tStart = target.selectionStart;
+      var tEnd = target.selectionEnd;
+      var tVal = target.value;
+
+      if (e.key === 'Escape' || ((e.ctrlKey || e.metaKey) && e.key === 'Enter')) {
+        e.preventDefault();
+        if (textBlock) exitCodeBlockToNewParagraph(textBlock, target);
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        var restOfPlain = tVal.substring(tEnd);
+        if (restOfPlain.indexOf('\n') === -1) {
+          e.preventDefault();
+          if (textBlock) exitCodeBlockToNewParagraph(textBlock, target);
+          return;
+        }
+      }
+
+      if (e.key === 'ArrowUp') {
+        var beforePlain = tVal.substring(0, tStart);
+        if (beforePlain.indexOf('\n') === -1) {
+          e.preventDefault();
+          if (textBlock) exitCodeBlockToPreviousParagraph(textBlock, target);
+          return;
+        }
+      }
+
+      return;
+    }
 
     /* Bulletproof Backspace Interception */
-    if (e.key === 'Backspace' && !isCodeTA) {
+    if (e.key === 'Backspace' && !isCodeTA && !isPlainTextTA) {
       var sel = window.getSelection();
       if (sel && sel.rangeCount > 0 && sel.isCollapsed) {
         var node = sel.anchorNode;
@@ -2226,7 +2568,7 @@
             if (textBefore.length === 0) {
               var prevSibling = blockEl.previousElementSibling;
 
-              if (prevSibling && (prevSibling.classList.contains('code-block') || prevSibling.classList.contains('notebook-img-box'))) {
+              if (prevSibling && (prevSibling.classList.contains('code-block') || prevSibling.classList.contains('text-block') || prevSibling.classList.contains('notebook-img-box'))) {
                 e.preventDefault();
 
                 var isCurrentEmpty = blockEl.innerText.replace(/[\u200B\s\n\r]/g, '').trim() === '';
@@ -2241,6 +2583,13 @@
                     if (ta) {
                       ta.focus();
                       ta.selectionStart = ta.selectionEnd = ta.value.length;
+                    }
+                  } else if (prevSibling.classList.contains('text-block')) {
+                    enterTextBlockEditMode(prevSibling);
+                    var pta = prevSibling.querySelector('textarea.plain-text-area');
+                    if (pta) {
+                      pta.focus();
+                      pta.selectionStart = pta.selectionEnd = pta.value.length;
                     }
                   } else {
                     if (!parentEl.querySelector('p')) {
@@ -2257,6 +2606,13 @@
                       ta2.focus();
                       ta2.selectionStart = ta2.selectionEnd = ta2.value.length;
                     }
+                  } else if (prevSibling.classList.contains('text-block')) {
+                    enterTextBlockEditMode(prevSibling);
+                    var pta2 = prevSibling.querySelector('textarea.plain-text-area');
+                    if (pta2) {
+                      pta2.focus();
+                      pta2.selectionStart = pta2.selectionEnd = pta2.value.length;
+                    }
                   }
                 }
                 syncActivePage();
@@ -2269,7 +2625,7 @@
     }
 
     /* Guard Forward Delete Key */
-    if (e.key === 'Delete' && !isCodeTA) {
+    if (e.key === 'Delete' && !isCodeTA && !isPlainTextTA) {
       var selDel = window.getSelection();
       if (selDel && selDel.rangeCount > 0 && selDel.isCollapsed) {
         var nodeDel = selDel.anchorNode;
@@ -2289,7 +2645,7 @@
 
             if (textAfter.length === 0) {
               var nextSibling = blockElDel.nextElementSibling;
-              if (nextSibling && (nextSibling.classList.contains('code-block') || nextSibling.classList.contains('notebook-img-box'))) {
+              if (nextSibling && (nextSibling.classList.contains('code-block') || nextSibling.classList.contains('text-block') || nextSibling.classList.contains('notebook-img-box'))) {
                 e.preventDefault();
                 if (nextSibling.classList.contains('code-block')) {
                   enterCodeEditMode(nextSibling);
@@ -2297,6 +2653,13 @@
                   if (taDel) {
                     taDel.focus();
                     taDel.selectionStart = taDel.selectionEnd = 0;
+                  }
+                } else if (nextSibling.classList.contains('text-block')) {
+                  enterTextBlockEditMode(nextSibling);
+                  var ptaDel = nextSibling.querySelector('textarea.plain-text-area');
+                  if (ptaDel) {
+                    ptaDel.focus();
+                    ptaDel.selectionStart = ptaDel.selectionEnd = 0;
                   }
                 }
                 syncActivePage();
@@ -2359,6 +2722,7 @@
           target.selectionStart = target.selectionEnd = newCursorPos;
         }
 
+        syncLiveHighlight(target);
         updateEditLineNumbers(target);
         autoGrowTextarea(target);
         syncActivePage();
@@ -2391,6 +2755,7 @@
           var newCursorPos = lineStart + formattedLine.length;
           target.selectionStart = target.selectionEnd = newCursorPos;
 
+          syncLiveHighlight(target);
           updateEditLineNumbers(target);
           autoGrowTextarea(target);
           syncActivePage();
@@ -2421,6 +2786,7 @@
           target.selectionStart = target.selectionEnd = start + 1;
         }
 
+        syncLiveHighlight(target);
         updateEditLineNumbers(target);
         autoGrowTextarea(target);
         syncActivePage();
@@ -2435,6 +2801,7 @@
           target.value = val.substring(0, start - 1) + val.substring(start + 1);
           target.selectionStart = target.selectionEnd = start - 1;
 
+          syncLiveHighlight(target);
           updateEditLineNumbers(target);
           autoGrowTextarea(target);
           syncActivePage();
@@ -2474,6 +2841,7 @@
         var spaces = '    ';
         target.value = val.substring(0, start) + spaces + val.substring(end);
         target.selectionStart = target.selectionEnd = start + spaces.length;
+        syncLiveHighlight(target);
         updateEditLineNumbers(target);
         autoGrowTextarea(target);
         syncActivePage();
@@ -2490,9 +2858,7 @@
     }
   });
 
-  function copyCodeFromBlock(block, btn) {
-    var textToCopy = getRawCodeFromBlock(block);
-
+  function copyTextToClipboard(textToCopy, btn) {
     function showSuccess() {
       var orig = btn.innerHTML;
       btn.innerHTML = '✓ Copied';
@@ -2512,6 +2878,11 @@
     }
   }
 
+  function copyCodeFromBlock(block, btn) {
+    var textToCopy = getRawCodeFromBlock(block);
+    copyTextToClipboard(textToCopy, btn);
+  }
+
   function fallbackCopy(text, cb) {
     var ta = document.createElement('textarea');
     ta.value = text;
@@ -2527,7 +2898,7 @@
   }
 
   pagesContainerEl.addEventListener('change', function(e){
-    if (e.target.classList && e.target.classList.contains('code-filename')) {
+    if (e.target.classList && (e.target.classList.contains('code-filename') || e.target.classList.contains('text-block-title'))) {
       e.target.setAttribute('value', e.target.value);
       syncActivePage();
     }
@@ -2543,6 +2914,15 @@
       return;
     }
 
+    var copyTextBtn = e.target.closest && e.target.closest('.copy-text-btn');
+    if (copyTextBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var tBlock = copyTextBtn.closest('.text-block');
+      if (tBlock) copyTextToClipboard(getRawTextFromTextBlock(tBlock), copyTextBtn);
+      return;
+    }
+
     var tocItem = e.target.closest && e.target.closest('.toc-item');
     if (tocItem) {
       setActive(tocItem.dataset.goto);
@@ -2555,7 +2935,7 @@
     if (pageBody) {
       if (e.target === pageBody) {
         var lastChild = pageBody.lastElementChild;
-        if (!lastChild || lastChild.classList.contains('code-block')) {
+        if (!lastChild || lastChild.classList.contains('code-block') || lastChild.classList.contains('text-block')) {
           var p = document.createElement('p');
           p.innerHTML = '<br>';
           pageBody.appendChild(p);
@@ -2583,6 +2963,20 @@
       return;
     }
 
+    var deleteTextBtn = e.target.closest && e.target.closest('.delete-text-btn');
+    if (deleteTextBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var tBlockDel = deleteTextBtn.closest('.text-block');
+      if (tBlockDel) {
+        if (confirm('Delete this text box?')) {
+          tBlockDel.remove();
+          syncActivePage();
+        }
+      }
+      return;
+    }
+
     var deleteImgBtn = e.target.closest && e.target.closest('.delete-img-btn');
     if (deleteImgBtn) {
       e.preventDefault();
@@ -2595,7 +2989,7 @@
       return;
     }
 
-    if (e.target.closest && (e.target.closest('.code-filename') || e.target.closest('textarea.cpp-code'))) {
+    if (e.target.closest && (e.target.closest('.code-filename') || e.target.closest('.text-block-title') || e.target.closest('textarea.cpp-code') || e.target.closest('textarea.plain-text-area'))) {
       return;
     }
 
@@ -2603,6 +2997,14 @@
     if (codeBlock) {
       if (!codeBlock.querySelector('textarea.cpp-code')) {
         enterCodeEditMode(codeBlock);
+      }
+      return;
+    }
+
+    var textBlock = e.target.closest && e.target.closest('.text-block');
+    if (textBlock) {
+      if (!textBlock.querySelector('textarea.plain-text-area')) {
+        enterTextBlockEditMode(textBlock);
       }
       return;
     }
@@ -2616,11 +3018,18 @@
       }
       exitCodeEditMode(e.target);
     }
+    if (e.target && e.target.classList && e.target.classList.contains('plain-text-area') && e.target.tagName === 'TEXTAREA') {
+      var currentTextBlock = e.target.closest('.text-block');
+      if (e.relatedTarget && currentTextBlock && currentTextBlock.contains(e.relatedTarget)) {
+        return;
+      }
+      exitTextBlockEditMode(e.target);
+    }
   });
 
   var codeInputRAF = null;
   pagesContainerEl.addEventListener('input', function(e){
-    if (e.target.classList && e.target.classList.contains('code-filename')) {
+    if (e.target.classList && (e.target.classList.contains('code-filename') || e.target.classList.contains('text-block-title'))) {
       e.target.setAttribute('value', e.target.value);
       syncActivePage();
       return;
@@ -2629,12 +3038,19 @@
     var isCodeTA = e.target.classList && e.target.classList.contains('cpp-code') && e.target.tagName === 'TEXTAREA';
     if (isCodeTA) {
       var ta = e.target;
+      syncLiveHighlight(ta);
       if (codeInputRAF) cancelAnimationFrame(codeInputRAF);
       codeInputRAF = requestAnimationFrame(function(){
         updateEditLineNumbers(ta);
         autoGrowTextarea(ta);
         codeInputRAF = null;
       });
+      return;
+    }
+
+    var isPlainTA = e.target.classList && e.target.classList.contains('plain-text-area') && e.target.tagName === 'TEXTAREA';
+    if (isPlainTA) {
+      autoGrowTextarea(e.target);
       return;
     }
 
@@ -2720,6 +3136,9 @@
     }
     document.querySelectorAll('textarea.cpp-code').forEach(function(ta){
       exitCodeEditMode(ta);
+    });
+    document.querySelectorAll('textarea.plain-text-area').forEach(function(ta){
+      exitTextBlockEditMode(ta);
     });
     syncActivePage();
   }
